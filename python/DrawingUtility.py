@@ -1,29 +1,15 @@
 import numpy as np
 import pandas as pd
 
-import xlsxwriter
-
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import tight_layout, xscale
 from matplotlib.ticker import MultipleLocator, Locator
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import matplotlib.image as mImage
 
-import tkinter
 from tkinter import *
-import pathlib
-from os.path import isfile, join
 
 
-colorstyle = plt.cm.bwr
-# colorstyle = plt.cm.gist_rainbow
-alphavalue = 0.6
 
-
-fh = 400
-fw = fh*2
-fs = (fw/200, 0.7*fh/100)
 
 class FigureConfig:
     @staticmethod
@@ -35,7 +21,8 @@ class FigureConfig:
         return ax, tk_plt
 
     @staticmethod
-    def MakeFigure(figuresize, legendinfo):
+    def MakeFigure(figuresize, legendinfo, colorstyle):
+        colorstyle = mpl.colormaps[colorstyle]
         color = iter(colorstyle(np.linspace(1, 0, legendinfo.__len__())))
         fig, ax = plt.subplots(figsize=figuresize, tight_layout=True)
         return ax, color

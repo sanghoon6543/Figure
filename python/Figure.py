@@ -1,27 +1,13 @@
-import numpy as np
-import pandas as pd
-import tkinter
+
 from tkinter import *
 import pathlib
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import UI_Config as UI
 import DrawingUtility as UTIL
 
-legendinfo = ['a, b  c']
-legenditer = iter(legendinfo)
-colorstyle = plt.cm.bwr
-# colorstyle = plt.cm.gist_rainbow
-alphavalue = 0.6
 
 fd = pathlib.Path(__file__).parent.resolve()
-tkfont = {'Font': 'Calibri', 'FontSize': 10}
-tickfontstyle = {'Font': 'Calibri', 'FontSize': 18}
-fontstyle = {'Font': 'Calibri', 'FontSize': 24}
-
-
 fh = 400
 fw = fh*2
 fs = (fw/200, 0.7*fh/100)
@@ -37,7 +23,9 @@ class Clipboard2Fig:
         ### Update Ipuntinfo
         for key in entryadress:
             self.InputInfo[key] = UTIL.DataProcessing.GetEntry(entryadress[key])
-#legend split
+
+        ### legend split
+        self.InputInfo['Legend'] = self.InputInfo['Legend'].split(', ')
 
         ## Make Preview Widget
         if not hasattr(self, 'ax'):
@@ -51,15 +39,16 @@ class Clipboard2Fig:
         plt.close(plt.gcf())
 
     def Event_NewFigure(self, inputinfo, ftstyle='Calibri', ftsize=24, tickftsize=10):
-        self.drawax, self.color = UTIL.FigureConfig.MakeFigure(fs, legendinfo)
+        self.drawax, self.color = UTIL.FigureConfig.MakeFigure(fs, inputinfo['Legend'], inputinfo['ColorStyleAlpha_0'])
         UTIL.FigureConfig.FigureConfiguration(self.drawax, inputinfo, ftstyle, ftsize, tickftsize)
-        UTIL.FigureConfig.forceAspect(self.drawax, self.InputInfo['xScale'], self.InputInfo['yScale'], aspect=1)
+        UTIL.FigureConfig.forceAspect(self.drawax, inputinfo['xScale'], inputinfo['yScale'], aspect=1)
 
-    def Event_DrawCurve(self, ax, color, legendinfo, alphavalue=alphavalue, marker='o', ftsize=16):
+    def Event_DrawCurve(self, ax, color, legendinfo, alphavalue, marker='None', ftsize=16):
+
         data = UTIL.DataProcessing.ReadClipboard()
         c = next(color)
 
-        ax.plot(data[0], data[1], c=c, alpha=alphavalue, marker=marker)
+        ax.plot(data[0], data[1], marker, c=c, alpha=alphavalue)
 
         ax.legend(legendinfo[:], loc='best', fontsize=ftsize)
         plt.pause(0.001)
@@ -84,7 +73,7 @@ class Clipboard2Fig:
 
         EntryInfos = {'Title': 'Title', 'xAxisTitle': 'x-Axis Title', 'yAxisTitle': 'y-Axis Title',
                       'xLim': (0, 1), 'yLim': (0, 1), 'MajorTickXY': (1, 1), 'Legend': 'a, b, c',
-                      'ColorStyleAlpha': ('bwr', '-', 0.6)}
+                      'ColorStyleAlpha': ('bwr', 'None', 0.6)}
         self.EntryAddress = {}
 
         for k, key in enumerate(EntryInfos):
@@ -128,9 +117,8 @@ class Clipboard2Fig:
         ### Designate Button Callback Function
         self.ButtonAddress['ApplyInfo'].configure(command=lambda: self.Event_ApplyInfo(self.OutputPlotFrame, self.EntryAddress))
         self.ButtonAddress['New Figure'].configure(command=lambda: self.Event_NewFigure(self.InputInfo.copy()))
-        self.ButtonAddress['Clipboard to Figure'].configure(command=lambda: self.Event_DrawCurve(self.drawax, self.color, legendinfo, alphavalue))
+        self.ButtonAddress['Clipboard to Figure'].configure(command=lambda: self.Event_DrawCurve(self.drawax, self.color, self.InputInfo['Legend'], float(self.InputInfo['ColorStyleAlpha_2']), self.InputInfo['ColorStyleAlpha_1']))
         self.ButtonAddress['Paint'].configure(command=lambda: self.Event_Paint(self.drawax, float(self.EntryAddress['PaintCenter'].get()), 'g', 0.2, 1))
-
 
 
 if __name__ == '__main__':
